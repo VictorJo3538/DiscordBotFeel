@@ -1,7 +1,7 @@
+// scheduleMsg.js
 const { EmbedBuilder } = require('discord.js');
-const { getData } = require('./sheets.js');
-async function getScheduleEmbed() {
-    const data = await getData();
+
+async function getScheduleEmbed(data) {
     let feelSchedule = '';
     let embed;
     for (let cell of data) {
@@ -16,10 +16,9 @@ async function getScheduleEmbed() {
         .setTitle('📅오늘의 스케줄 입니다.')
         .setAuthor({ name: '동방 스케줄 알리미', iconURL: 'https://cdn-icons-png.flaticon.com/512/1941/1941064.png' })
         .setImage('https://media.tenor.com/RIxCFKqtj6cAAAAi/guitar-cat.gif')
-        .setThumbnail('attachment://feel_logo_black.png')
+        .setThumbnail('attachment://feel_logo.png')
         .setDescription(feelSchedule);
 
     return embed;
 }
-// 변수 보내가
 module.exports = { getScheduleEmbed };  

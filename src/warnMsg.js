@@ -4,7 +4,6 @@ function getWarnEmbed(content) {
         .setColor(0xFFA500)
         .setTitle('❗알림❗')
         .setDescription(content);
-
     return embed;
 }
 module.exports = { getWarnEmbed };
