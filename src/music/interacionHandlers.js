@@ -39,6 +39,10 @@ async function handleQueueButton(interaction) {
   }
 }
 
+async function handleIfNotInVoice(interaction) {
+  await interactionReply(`<@${interaction.member.id}> 음성채널에 입장해주세요`, interaction);
+}
+
 async function interactionReply(content, interaction, timeout = 3000) {
   let reply;
   if (typeof content == "string") {
@@ -55,4 +59,5 @@ module.exports = {
   handleSkipButton,
   handleStopButton,
   handleQueueButton,
+  handleIfNotInVoice
 };

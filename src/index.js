@@ -1,4 +1,3 @@
-const path = require('path'); // path 모듈 추가
 const readline = require('readline').createInterface({
     input: process.stdin,
     output: process.stdout
@@ -8,7 +7,7 @@ function main(testMode) {
     const { Client, Events, GatewayIntentBits } = require('discord.js');
     const { initializeScheduleManager } = require('./schedule/index.js');
     const { initializeMusicService } = require('./music/index.js');
-    const { handlePauseButton, handleSkipButton, handleStopButton, handleQueueButton } = require('./music/interacionHandlers.js');
+    const { handlePauseButton, handleSkipButton, handleStopButton, handleQueueButton, handleIfNotInVoice } = require('./music/interacionHandlers.js');
     const { handleMusicMessage } = require('./music/messageHandlers.js');
     const { blockUserMessage } = require('./utils.js');
     const client = new Client({ intents: Object.values(GatewayIntentBits) });
@@ -39,29 +38,34 @@ function main(testMode) {
 
     // 메시지
     client.on(Events.MessageCreate, async msg => {
-        await handleMusicMessage(msg, musicChannel); // 검색어 또는 url
-        blockUserMessage(msg, scheduleChannel, musicChannel); // 채팅방지
+        await handleMusicMessage(msg, musicChannel).catch(console.error); // 검색어 또는 url
+        await blockUserMessage(msg, scheduleChannel, musicChannel).catch(console.error); // 채팅방지
     });
 
     // 버튼 입력
     client.on(Events.InteractionCreate, async interaction => {
-        if (!interaction.isButton())
+        if (!interaction.isButton() )
             return;
+        if (!interaction.member.voice.channel) {
+            await handleIfNotInVoice(interaction);
+            return;
+        }
         if (interaction.customId === 'pause_button') {
-            handlePauseButton(interaction);
+            await handlePauseButton(interaction);
         }
         if (interaction.customId === 'skip_button') {
-            handleSkipButton(interaction);
+            await handleSkipButton(interaction);
         }
         if (interaction.customId === 'stop_button') {
-            handleStopButton(interaction);
+            await handleStopButton(interaction);
         }
         if (interaction.customId === 'check_queue') {
-            handleQueueButton(interaction);
+            await handleQueueButton(interaction);
         }
     });
 
     // 디스코드 봇 로그인
+    const path = require('path'); // path 모듈 추가
     const dotenv = require("dotenv");
     const envPath = path.resolve(__dirname, '../.env'); // 절대 경로로 설정
     const envResult = dotenv.config({ path: envPath });

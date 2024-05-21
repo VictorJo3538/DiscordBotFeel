@@ -13,8 +13,7 @@ function getNextQueue() {
 
 // 큐에서 곡제목을 가져오는 함수
 function getQueueTitles() {
-    queueTitles = musicQueue.map((info, index) => `${index + 1}. ${info.videoDetails.title}`).join('\n');
-    return queueTitles;
+    return musicQueue.map((info, index) => `${index + 1}. ${info.video_details.title}`).join('\n');
 }
 
 // 현재 큐에 있는 음악 목록을 반환하는 함수

@@ -1,10 +1,11 @@
 // messageHandlers.js
-const ytdl = require('ytdl-core');
+const playdl = require('play-dl');
 const { getWarnEmbed } = require('../utils');
 const { joinVoiceChannel, AudioPlayerStatus } = require('@discordjs/voice');
-const { playMusic, setConnection } = require('./player');
+const { playMusic, setConnection, checkForEmptyChannel } = require('./player');
 const { addToQueue } = require('./queue');
-const { getUrl } = require('./search');
+
+let emptyChannelChecker = false; // 타이머를 관리할 변수
 
 async function handleMusicMessage(msg, musicChannel) {
     if (!msg.author.bot && msg.channel === musicChannel) {
@@ -15,30 +16,33 @@ async function handleMusicMessage(msg, musicChannel) {
         }
 
         try {
-            let url = msg.content;
-            if (!url.startsWith('http')) {
-                console.log('음악 검색 중');
-                url = await getUrl(url);
-                if (!url) {
-                    throw new Error('유효하지 않은 검색결과');
-                }
-            }
-
             const connection = joinVoiceChannel({
                 channelId: voiceChannel.id,
                 guildId: voiceChannel.guild.id,
                 adapterCreator: voiceChannel.guild.voiceAdapterCreator,
             });
             setConnection(connection); // connection 객체 넘겨주기 
-
-            const info = await ytdl.getInfo(url);
+            let url = msg.content;
+            if (!url.startsWith('http')) {
+                console.log('음악 검색 중', msg.content);
+                const res = await playdl.search(msg.content, { source: { youtube: "video" } });
+                url = res[0].url;
+                if (!url) {
+                    throw new Error('유효하지 않은 검색결과');
+                }
+            } 
+            const info = await playdl.video_info(url);
             addToQueue(info);
 
             if (!connection.state.subscription || connection.state.subscription.player.state.status !== AudioPlayerStatus.Playing) {
-                playMusic();
+                playMusic(); // 음악재생
+                if (!emptyChannelChecker) {
+                    checkForEmptyChannel(voiceChannel); 
+                    emptyChannelChecker = true;
+                }
             }
 
-            await messageReply(`음악 "${info.videoDetails.title}"을(를) 큐에 추가했습니다!`, msg);
+            await messageReply(`음악 "${info.video_details.title}"을(를) 큐에 추가했습니다!`, msg);
         } catch (error) {
             console.error('오류발생!: ', error);
             await messageReply(`오류발생!: ${error}`, msg);
