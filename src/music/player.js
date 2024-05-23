@@ -1,6 +1,6 @@
 // player.js
 const { createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
-const { EmbedBuilder, Client } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const playdl = require('play-dl');
 const { musicEmbed } = require('./musicEmbed');
 const { clearQueue, getQueue, getNextQueue } = require('./queue');
