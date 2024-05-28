@@ -10,15 +10,15 @@ async function initializeScheduleManager(scheduleChannel) {
     let scheduleMsg = await scheduleChannel.send({ embeds: [await getScheduleEmbed(await getData())], files: [feel_logo] }); // 채널에 메시지 전송
 
     // 한국 시간대(KST) 기준으로 10시에 메시지 업데이트
-    const now = DateTime.now().setZone('Asia/Seoul'); // 현재 시간을 KST로 설정
-    const sendMessageAtTime = now.set({ hour: 10, minute: 0, second: 0, millisecond: 0 });
+    let now = DateTime.now().setZone('Asia/Seoul'); // 현재 시간을 KST로 설정
+    let sendMessageAtTime = now.set({ hour: 10, minute: 0, second: 0, millisecond: 0 });
 
     // 만약 현재 시간이 이미 10시를 지난 경우, 다음 날 10시로 설정
     if (now > sendMessageAtTime) {
         sendMessageAtTime = sendMessageAtTime.plus({ days: 1 });
     }
 
-    const interval = sendMessageAtTime.diff(now).as('milliseconds'); // 현재 시간과의 차이 계산
+    let interval = sendMessageAtTime.diff(now).as('milliseconds'); // 현재 시간과의 차이 계산
 
     // interval 밀리초 후에 메시지 전송
     setTimeout(async () => {

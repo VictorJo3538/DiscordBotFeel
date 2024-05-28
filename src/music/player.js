@@ -74,7 +74,7 @@ function togglePauseMusic() { // pause: true 반환, unpause: false 반환
 
 function skipMusic() {
     if (connection && connection.state.subscription) {
-        connection.state.subscription.player.stop();
+        connection.state.subscription.player.pause();
         playMusic();
     }
 }
