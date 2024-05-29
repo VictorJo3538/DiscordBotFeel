@@ -1,3 +1,4 @@
+// warnMsg.js
 const { EmbedBuilder } = require('discord.js');
 function getWarnEmbed(content) {
     let embed = new EmbedBuilder()

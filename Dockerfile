@@ -8,4 +8,4 @@ RUN npm ci
 
 COPY . .
 
-ENTRYPOINT [ "node", "index.js" ]
+ENTRYPOINT [ "node", "src/index.js" ]
