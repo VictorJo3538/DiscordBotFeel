@@ -13,11 +13,13 @@ let musicChannel = undefined;
 // 봇 시작
 client.on(Events.ClientReady, async () => {
     // 채널선언
-    // scheduleChannel = client.channels.cache.get('1226818915997585408'); // 동방시간표 채널
-    // musicChannel = client.channels.cache.get('1104009403163746396'); // 음악채널
-    scheduleChannel = client.channels.cache.get('1226476047155859516'); // 테스트 동방시간표 채널
-    musicChannel = client.channels.cache.get('1232664579163558058'); // 테스트 음악채널
-
+    if (testMode) {
+        scheduleChannel = client.channels.cache.get('1226476047155859516'); // 테스트 동방시간표 채널
+        musicChannel = client.channels.cache.get('1232664579163558058'); // 테스트 음악채널
+    } else {
+        scheduleChannel = client.channels.cache.get('1226818915997585408'); // 동방시간표 채널
+        musicChannel = client.channels.cache.get('1104009403163746396'); // 음악채널
+    }
     // 시작 메시지 설정
     console.log(`[${client.user.tag}] 가동중!`);
     client.user.setActivity("수리 및 테스트");
@@ -66,7 +68,15 @@ if (envResult.error) {
     return;
 }
 
-// const token = process.env.TOKEN;
-const token = process.env.TESTTOKEN;
+// 테스트모드
+const testMode = process.env.MODE;
+console.log("테스트모드 변수", testMode);
+
+let token = undefined;
+if (testMode) {
+    token = process.env.TESTTOKEN;
+} else {
+    token = process.env.TOKEN;
+}
 console.log('다음 토큰 사용됨', token);
 client.login(token);
