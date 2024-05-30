@@ -69,7 +69,7 @@ if (envResult.error) {
 }
 
 // 테스트모드
-const testMode = process.env.MODE;
+const testMode = Number(process.env.MODE);
 console.log("테스트모드 변수", testMode);
 
 let token = undefined;
