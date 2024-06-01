@@ -27,8 +27,22 @@ const queueButton = new ButtonBuilder()
     .setLabel('재생목록 확인')
     .setStyle(ButtonStyle.Primary);
 
-// 버튼 행
-const musicButtons = new ActionRowBuilder()
-    .addComponents( pauseButton, skipButton, stopButton, queueButton );
+// 쏜애플
+const thornButton = new ButtonBuilder()
+    .setCustomId('thorn_button')
+    .setLabel('쏜애플🍎')
+    .setStyle(ButtonStyle.Secondary);
 
-module.exports = { pauseButton, skipButton, stopButton, queueButton, musicButtons };
+// 실리카겔
+const silkaButton = new ButtonBuilder()
+    .setCustomId('silka_button')
+    .setLabel('실리카겔🕂')
+    .setStyle(ButtonStyle.Secondary);
+
+// 버튼 행
+const musicButtons1 = new ActionRowBuilder()
+    .addComponents(pauseButton, skipButton, stopButton, queueButton);
+const musicButtons2 = new ActionRowBuilder()
+    .addComponents(thornButton, silkaButton);
+
+module.exports = { pauseButton, skipButton, stopButton, queueButton, thornButton, silkaButton, musicButtons1, musicButtons2 };

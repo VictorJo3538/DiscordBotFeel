@@ -7,8 +7,7 @@ const feel_logo = path.resolve(__dirname, '../../public/feel_logo.png');
 
 async function initializeScheduleManager(scheduleChannel) {
     await purgeChannel(scheduleChannel); // 동방시간표 채널 메시지 삭제
-    let scheduleMsg = await scheduleChannel.send({ embeds: [await getScheduleEmbed(await getData())], files: [feel_logo] }); // 채널에 메시지 전송
-
+    let scheduleMsg;
     // 한국 시간대(KST) 기준으로 10시에 메시지 업데이트
     let now = DateTime.now().setZone('Asia/Seoul'); // 현재 시간을 KST로 설정
     let sendMessageAtTime = now.set({ hour: 10, minute: 0, second: 0, millisecond: 0 });
@@ -22,7 +21,6 @@ async function initializeScheduleManager(scheduleChannel) {
 
     // interval 밀리초 후에 메시지 전송
     setTimeout(async () => {
-        scheduleMsg.delete();
         scheduleMsg = await scheduleChannel.send({ embeds: [await getScheduleEmbed(await getData())], files: [feel_logo] });
         console.log('새로운 날짜의 메시지를 전송했습니다.');
 

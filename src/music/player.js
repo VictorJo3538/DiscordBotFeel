@@ -3,7 +3,7 @@ const { createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@
 const { EmbedBuilder } = require('discord.js');
 const playdl = require('play-dl');
 const { musicEmbed } = require('./musicEmbed');
-const { clearQueue, getQueue, getNextQueue } = require('./queue');
+const { addToQueue, clearQueue, getQueue, getNextQueue } = require('./queue');
 
 let musicMsg = undefined;
 let connection = undefined; // 보이스 커넥션
@@ -79,6 +79,23 @@ function skipMusic() {
     }
 }
 
+async function addFiveSongs(quary) {
+    if (!(connection && connection.state.subscription)) {
+        
+    }
+    console.log(`${quary}검색 중`);
+    let res = await playdl.search(quary, { source: { youtube: "video" } });
+    for (let i = res.length - 1; i > 0; i--) { // Fisher-Yates 셔플 알고리즘을 사용하여 랜덤으로 5개 선택
+        const j = Math.floor(Math.random() * (i + 1));
+        [res[i], res[j]] = [res[j], res[i]]; // 요소 교환
+    }
+    res = res.slice(0, 5);
+    for (let i = 0; i < 5; i ++) {
+        const videoInfo = await playdl.video_info(res[i].url);
+        addToQueue(videoInfo);
+    }
+}
+
 function checkForEmptyChannel(voiceChannel) {
     console.log('빈 채널 확인함수 작동시작')
     setInterval(() => {
@@ -95,6 +112,8 @@ module.exports = {
     togglePauseMusic,
     skipMusic,
     checkForEmptyChannel,
+    addFiveSongs,
+    getConnection: () => { return connection; },
     setConnection: (conn) => { connection = conn; },
     setMusicMsg: (msg) => { musicMsg = msg }
 };

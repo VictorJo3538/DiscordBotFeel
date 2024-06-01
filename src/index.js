@@ -1,7 +1,7 @@
 const { Client, Events, GatewayIntentBits } = require('discord.js');
 const { initializeScheduleManager } = require('./schedule/index.js');
 const { initializeMusicService } = require('./music/index.js');
-const { handlePauseButton, handleSkipButton, handleStopButton, handleQueueButton, handleIfNotInVoice } = require('./music/interacionHandlers.js');
+const { handlePauseButton, handleSkipButton, handleStopButton, handleQueueButton, handleSilkaButton, handleThornButton, handleIfNotInVoice, handleArtistButton } = require('./music/interacionHandlers.js');
 const { handleMusicMessage } = require('./music/messageHandlers.js');
 const { blockUserMessage } = require('./utils.js');
 const client = new Client({ intents: Object.values(GatewayIntentBits) });
@@ -22,7 +22,23 @@ client.on(Events.ClientReady, async () => {
     }
     // 시작 메시지 설정
     console.log(`[${client.user.tag}] 가동중!`);
-    client.user.setActivity("수리 및 테스트");
+    client.user.set;
+    // 변경할 상태 메시지 배열
+    const statuses = [
+        '동아리방을 사용 후 꼭 정리 해 주세요!',
+        '!!네이비즘을 찍는것을 잊지 마세요!!',
+        '동아리방 장비 비싸니 조심히 다뤄주세요',
+        '버그 및 기능 요구는 [조승민]에게',
+        '제작자 깃허브: https://github.com/VictorJo3538'
+    ];
+    // 5초마다 상태 메시지 변경
+    let index = 0;
+    setInterval(() => {
+        client.user.setPresence({
+            activities: [{ name: statuses[index] }],
+        });
+        index = (index + 1) % statuses.length;
+    }, 10000);
 
     // 기능 초기화
     await initializeScheduleManager(scheduleChannel).catch(console.error); // 동방스케줄 매니저
@@ -54,6 +70,12 @@ client.on(Events.InteractionCreate, async interaction => {
     }
     if (interaction.customId === 'check_queue') {
         await handleQueueButton(interaction);
+    }
+    if (interaction.customId === 'thorn_button') {
+        await handleArtistButton(interaction, '쏜애플');
+    }
+    if (interaction.customId === 'silka_button') {
+        await handleArtistButton(interaction, '실리카겔');
     }
 });
 

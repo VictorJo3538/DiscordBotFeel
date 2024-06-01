@@ -1,7 +1,8 @@
 // InteractionHandler.js
 const { EmbedBuilder } = require('discord.js');
+const { joinVoiceChannel } = require('@discordjs/voice');
 const { getWarnEmbed } = require('../utils');
-const { togglePauseMusic, skipMusic, stopMusic } = require('./player');
+const { togglePauseMusic, skipMusic, stopMusic, addFiveSongs, playMusic, getConnection, setConnection } = require('./player');
 const { getQueueTitles } = require('./queue');
 
 async function handlePauseButton(interaction) {
@@ -43,6 +44,32 @@ async function handleIfNotInVoice(interaction) {
   await interactionReply(`<@${interaction.member.id}> 음성채널에 입장해주세요`, interaction);
 }
 
+async function handleArtistButton(interaction, artist) {
+  await interactionReply(`랜덤 ${artist} 노래 5곡을 재생목록에 추가합니다`, interaction);
+  await checkConnection(interaction);
+  await addFiveSongs(artist);
+  playMusic();
+}
+
+async function checkConnection(interaction) {
+  const connection = getConnection();
+  if (connection && connection.state.subscription) {
+    return;
+  }
+  const voiceChannel = interaction.member.voice.channel;
+  try {
+    const connection = joinVoiceChannel({
+      channelId: voiceChannel.id,
+      guildId: voiceChannel.guild.id,
+      adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+    });
+    setConnection(connection);
+  } catch (error) {
+    console.error('오류발생!: ', error);
+    await interactionReply(`오류발생!: ${error}`, interaction);
+  }
+}
+
 async function interactionReply(content, interaction, timeout = 3000) {
   let reply;
   if (typeof content == "string") {
@@ -59,5 +86,6 @@ module.exports = {
   handleSkipButton,
   handleStopButton,
   handleQueueButton,
-  handleIfNotInVoice
+  handleArtistButton,
+  handleIfNotInVoice,
 };
