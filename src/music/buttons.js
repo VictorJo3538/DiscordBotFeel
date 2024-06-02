@@ -3,9 +3,9 @@ const { ButtonBuilder, ActionRowBuilder, ButtonStyle } = require('discord.js');
 // 일시중지버튼
 const pauseButton = new ButtonBuilder()
     .setCustomId('pause_button') // 버튼 식별자 설정
-    .setLabel('음악 중지') // 버튼 레이블 설정
+    .setLabel('일시정지') // 버튼 레이블 설정
     .setStyle(ButtonStyle.Secondary) // 버튼 스타일 설정
-    .setEmoji('⏯️'); // 아이콘 추가 
+    .setEmoji('⏸️'); // 아이콘 추가 
 
 // 스킵 버튼
 const skipButton = new ButtonBuilder()

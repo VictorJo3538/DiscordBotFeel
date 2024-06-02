@@ -50,13 +50,13 @@ async function playMusic() {
 function stopMusic() {
     if (connection && connection.state.subscription) { // 현재 재생 중인 음악이 있으면 중지
         connection.state.subscription.player.stop();
-    }
-    if (connection) { // 보이스 커넥션 종료
         connection.destroy();
         connection = undefined;
+        clearQueue(); // 큐 비우기
+        musicMsg.edit({ embeds: [musicEmbed] });
+    } else {
+        return null
     }
-    clearQueue(); // 큐 비우기
-    musicMsg.edit({ embeds: [musicEmbed] });
 }
 
 function togglePauseMusic() { // pause: true 반환, unpause: false 반환
@@ -69,6 +69,8 @@ function togglePauseMusic() { // pause: true 반환, unpause: false 반환
             player.unpause();
             return false;
         }
+    } else {
+        return null;
     }
 }
 
@@ -76,13 +78,12 @@ function skipMusic() {
     if (connection && connection.state.subscription) {
         connection.state.subscription.player.pause();
         playMusic();
+    } else {
+        return null;
     }
 }
 
 async function addFiveSongs(quary) {
-    if (!(connection && connection.state.subscription)) {
-        
-    }
     console.log(`${quary}검색 중`);
     let res = await playdl.search(quary, { source: { youtube: "video" } });
     for (let i = res.length - 1; i > 0; i--) { // Fisher-Yates 셔플 알고리즘을 사용하여 랜덤으로 5개 선택
@@ -90,7 +91,7 @@ async function addFiveSongs(quary) {
         [res[i], res[j]] = [res[j], res[i]]; // 요소 교환
     }
     res = res.slice(0, 5);
-    for (let i = 0; i < 5; i ++) {
+    for (let i = 0; i < 5; i++) {
         const videoInfo = await playdl.video_info(res[i].url);
         addToQueue(videoInfo);
     }
@@ -115,5 +116,6 @@ module.exports = {
     addFiveSongs,
     getConnection: () => { return connection; },
     setConnection: (conn) => { connection = conn; },
+    getMusicMsg: () => { return musicMsg; },
     setMusicMsg: (msg) => { musicMsg = msg }
 };
