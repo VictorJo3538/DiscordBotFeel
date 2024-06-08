@@ -6,4 +6,6 @@ services:
       dockerfile: Dockerfile
     container_name: feel-con-test
     image: feel-img-test
+    ports:
+      - "3000:3000"  
     restart: always
