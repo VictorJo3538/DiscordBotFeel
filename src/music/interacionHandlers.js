@@ -1,5 +1,5 @@
 // InteractionHandler.js
-const { EmbedBuilder, Component } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const { joinVoiceChannel } = require('@discordjs/voice');
 const { getWarnEmbed } = require('../utils');
 const { togglePauseMusic, skipMusic, stopMusic, addFiveSongs, playMusic, getConnection, setConnection, getMusicMsg } = require('./player');
