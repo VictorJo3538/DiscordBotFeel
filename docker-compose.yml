@@ -1,11 +1,8 @@
 version: '3'
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: feel-con-test
-    image: feel-img-test
-    ports:
-      - "3000:3000"  
+  bot:
+    build: .
+    container_name: feel-test
+    image: feel-test
     restart: always
+    network_mode: host
