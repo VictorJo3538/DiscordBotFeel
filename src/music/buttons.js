@@ -21,6 +21,12 @@ const stopButton = new ButtonBuilder()
     .setStyle(ButtonStyle.Secondary)
     .setEmoji('⏹️');
 
+// 반복재생
+const loopButton = new ButtonBuilder()
+    .setCustomId('loop_button')
+    .setLabel('반복재생: off')
+    .setStyle(ButtonStyle.Secondary);
+
 // 큐 보기
 const queueButton = new ButtonBuilder()
     .setCustomId('check_queue')
@@ -41,8 +47,8 @@ const silkaButton = new ButtonBuilder()
 
 // 버튼 행
 const musicButtons1 = new ActionRowBuilder()
-    .addComponents(pauseButton, skipButton, stopButton, queueButton);
+    .addComponents(pauseButton, skipButton, stopButton, loopButton, queueButton);
 const musicButtons2 = new ActionRowBuilder()
     .addComponents(thornButton, silkaButton);
 
-module.exports = { pauseButton, skipButton, stopButton, queueButton, thornButton, silkaButton, musicButtons1, musicButtons2 };
+module.exports = { pauseButton, skipButton, stopButton, loopButton, queueButton, thornButton, silkaButton, musicButtons1, musicButtons2 };

@@ -6,6 +6,10 @@ function addToQueue(musicInfo) {
     musicQueue.push(musicInfo);
 }
 
+function addToFrontOfQueue(musicInfo) {
+    musicQueue.unshift(musicInfo);
+}
+
 // 큐에서 다음 음악 정보 가져오는 함수
 function getNextQueue() {
     return musicQueue.shift();
@@ -26,4 +30,4 @@ function clearQueue() {
     musicQueue = [];
 }
 
-module.exports = { addToQueue, getNextQueue, getQueueTitles, getQueue, clearQueue };
+module.exports = { addToQueue, addToFrontOfQueue, getNextQueue, getQueueTitles, getQueue, clearQueue };

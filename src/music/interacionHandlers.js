@@ -2,9 +2,9 @@
 const { EmbedBuilder } = require('discord.js');
 const { joinVoiceChannel } = require('@discordjs/voice');
 const { getWarnEmbed } = require('../utils');
-const { togglePauseMusic, skipMusic, stopMusic, addFiveSongs, playMusic, getConnection, setConnection, getMusicMsg } = require('./player');
+const { togglePauseMusic, skipMusic, stopMusic, addFiveSongs, playMusic, getConnection, setConnection, getMusicMsg, getLooping, setLooping } = require('./player');
 const { getQueueTitles } = require('./queue');
-const { pauseButton, musicButtons1 } = require('./buttons');
+const { pauseButton, loopButton, musicButtons1, musicButtons2 } = require('./buttons');
 
 async function handlePauseButton(interaction) {
   let isPaused = togglePauseMusic();
@@ -19,8 +19,7 @@ async function handlePauseButton(interaction) {
     await interactionReply('다시 재생합니다!', interaction);
     pauseButton.setLabel('일시정지').setEmoji('⏸️');
   }
-  const musicMsg = getMusicMsg();
-  musicMsg.edit({ components: [musicButtons1] });
+  await getMusicMsg().edit({ components: [musicButtons1, musicButtons2] });
 }
 
 async function handleSkipButton(interaction) {
@@ -36,9 +35,23 @@ async function handleStopButton(interaction) {
   const res = stopMusic();
   if (res === null) {
     await interactionReply('음악 재생중이 아닙니다', interaction);
-    return; 
+    return;
   }
   await interactionReply('종료 되었습니다!', interaction);
+}
+
+async function handleLoopButton(interaction) {
+  const isLooping = getLooping();
+  if (!isLooping) {
+    await interactionReply('현재 음악을 반복재생합니다', interaction);
+    setLooping(true);
+    loopButton.setLabel("반복재생: on");
+  } else {
+    await interactionReply('현재 음악을 반복재생하지 않습니다.', interaction);
+    setLooping(false);
+    loopButton.setLabel("반복재생: off");
+  }
+  await getMusicMsg().edit({ components: [musicButtons1, musicButtons2] });
 }
 
 async function handleQueueButton(interaction) {
@@ -57,37 +70,37 @@ async function handleQueueButton(interaction) {
   }
 }
 
-async function handleIfNotInVoice(interaction) {
-  await interactionReply(`<@${interaction.member.id}> 음성채널에 입장해주세요`, interaction);
-}
-
 async function handleArtistButton(interaction, artist) {
   await interactionReply(`랜덤 ${artist} 노래 5곡을 재생목록에 추가합니다`, interaction);
   await addFiveSongs(artist);
-  const res = await checkConnection(interaction);
+  const res = checkConnection(interaction);
   if (!res) {
+    const voiceChannel = interaction.member.voice.channel;
+    try {
+      const connection = joinVoiceChannel({
+        channelId: voiceChannel.id,
+        guildId: voiceChannel.guild.id,
+        adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+      });
+      setConnection(connection);
+    } catch (error) {
+      console.error('오류발생!: ', error);
+      await interactionReply(`오류발생!: ${error}`, interaction);
+    }
     playMusic();
   }
 }
 
-async function checkConnection(interaction) {
+async function handleIfNotInVoice(interaction) {
+  await interactionReply(`<@${interaction.member.id}> 음성채널에 입장해주세요`, interaction);
+}
+
+function checkConnection() {
   const connection = getConnection();
   if (connection && connection.state.subscription) {
     return true;
   }
-  const voiceChannel = interaction.member.voice.channel;
-  try {
-    const connection = joinVoiceChannel({
-      channelId: voiceChannel.id,
-      guildId: voiceChannel.guild.id,
-      adapterCreator: voiceChannel.guild.voiceAdapterCreator,
-    });
-    setConnection(connection);
-    return null;
-  } catch (error) {
-    console.error('오류발생!: ', error);
-    await interactionReply(`오류발생!: ${error}`, interaction);
-  }
+  return false;
 }
 
 async function interactionReply(content, interaction, timeout = 3000) {
@@ -105,6 +118,7 @@ module.exports = {
   handlePauseButton,
   handleSkipButton,
   handleStopButton,
+  handleLoopButton,
   handleQueueButton,
   handleArtistButton,
   handleIfNotInVoice,

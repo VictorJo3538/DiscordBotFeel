@@ -1,7 +1,7 @@
 const { Client, Events, GatewayIntentBits } = require('discord.js');
 const { initializeScheduleManager } = require('./schedule/index.js');
 const { initializeMusicService } = require('./music/index.js');
-const { handlePauseButton, handleSkipButton, handleStopButton, handleQueueButton, handleSilkaButton, handleThornButton, handleIfNotInVoice, handleArtistButton } = require('./music/interacionHandlers.js');
+const { handlePauseButton, handleSkipButton, handleStopButton, handleQueueButton, handleIfNotInVoice, handleArtistButton, handleLoopButton } = require('./music/interacionHandlers.js');
 const { handleMusicMessage } = require('./music/messageHandlers.js');
 const { blockUserMessage } = require('./utils.js');
 const client = new Client({ intents: Object.values(GatewayIntentBits) });
@@ -67,6 +67,9 @@ client.on(Events.InteractionCreate, async interaction => {
     }
     if (interaction.customId === 'stop_button') {
         await handleStopButton(interaction);
+    }
+    if (interaction.customId === 'loop_button') {
+        await handleLoopButton(interaction);
     }
     if (interaction.customId === 'check_queue') {
         await handleQueueButton(interaction);

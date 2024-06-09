@@ -1,12 +1,14 @@
 // player.js
 const { createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, Component } = require('discord.js');
 const playdl = require('play-dl');
 const { musicEmbed } = require('./musicEmbed');
-const { addToQueue, clearQueue, getQueue, getNextQueue } = require('./queue');
+const { addToQueue, clearQueue, getQueue, getNextQueue, addToFrontOfQueue } = require('./queue');
+const { pauseButton, loopButton, musicButtons1 } = require('./buttons');
 
 let musicMsg = undefined;
 let connection = undefined; // 보이스 커넥션
+let isLooping = false; // 반복여부 결정변수
 
 async function playMusic() {
     const musicQueue = getQueue();
@@ -43,6 +45,9 @@ async function playMusic() {
     musicMsg.edit({ embeds: [embed] });
 
     player.on(AudioPlayerStatus.Idle, async () => {
+        if (isLooping) {
+            addToFrontOfQueue(info); 
+        }
         playMusic();
     });
 }
@@ -53,7 +58,10 @@ function stopMusic() {
         connection.destroy();
         connection = undefined;
         clearQueue(); // 큐 비우기
-        musicMsg.edit({ embeds: [musicEmbed] });
+        pauseButton.setLabel('일시정지').setEmoji('⏸️');
+        loopButton.setLabel('반복재생: off');
+        isLooping = false;
+        musicMsg.edit({ embeds: [musicEmbed], components: [musicButtons1] });
     } else {
         return null
     }
@@ -117,5 +125,7 @@ module.exports = {
     getConnection: () => { return connection; },
     setConnection: (conn) => { connection = conn; },
     getMusicMsg: () => { return musicMsg; },
-    setMusicMsg: (msg) => { musicMsg = msg }
+    setMusicMsg: (msg) => { musicMsg = msg; },
+    getLooping: () => { return isLooping; },
+    setLooping: (bool) => { isLooping = bool; }
 };
