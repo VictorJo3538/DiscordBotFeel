@@ -4,7 +4,7 @@ const { EmbedBuilder, Component } = require('discord.js');
 const playdl = require('play-dl');
 const { musicEmbed } = require('./musicEmbed');
 const { addToQueue, clearQueue, getQueue, getNextQueue, addToFrontOfQueue } = require('./queue');
-const { pauseButton, loopButton, musicButtons1 } = require('./buttons');
+const { pauseButton, loopButton, musicButtons1, musicButtons2 } = require('./buttons');
 
 let musicMsg = undefined;
 let connection = undefined; // 보이스 커넥션
@@ -61,7 +61,7 @@ function stopMusic() {
         pauseButton.setLabel('일시정지').setEmoji('⏸️');
         loopButton.setLabel('반복재생: off');
         isLooping = false;
-        musicMsg.edit({ embeds: [musicEmbed], components: [musicButtons1] });
+        musicMsg.edit({ embeds: [musicEmbed], components: [musicButtons1, musicButtons2] });
     } else {
         return null
     }
