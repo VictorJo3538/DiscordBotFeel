@@ -1,8 +1,0 @@
-version: '3'
-services:
-  bot:
-    build: .
-    container_name: feel-test
-    image: feel-test
-    restart: always
-    network_mode: host
