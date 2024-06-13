@@ -1,6 +1,6 @@
 // player.js
 const { createAudioPlayer, createAudioResource, AudioPlayerStatus } = require('@discordjs/voice');
-const { EmbedBuilder, Component } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const playdl = require('play-dl');
 const { musicEmbed } = require('./musicEmbed');
 const { addToQueue, clearQueue, getQueue, getNextQueue, addToFrontOfQueue } = require('./queue');
@@ -46,55 +46,46 @@ async function playMusic() {
 
     player.on(AudioPlayerStatus.Idle, async () => {
         if (isLooping) {
-            addToFrontOfQueue(info); 
+            addToFrontOfQueue(info);
         }
         playMusic();
     });
 }
 
 function stopMusic() {
-    if (connection && connection.state.subscription) { // 현재 재생 중인 음악이 있으면 중지
-        connection.state.subscription.player.stop();
-        connection.destroy();
-        connection = undefined;
-        clearQueue(); // 큐 비우기
-        pauseButton.setLabel('일시정지').setEmoji('⏸️');
-        loopButton.setLabel('반복재생: off');
-        isLooping = false;
-        musicMsg.edit({ embeds: [musicEmbed], components: [musicButtons1, musicButtons2] });
-    } else {
-        return null
-    }
+    connection.state.subscription.player.stop();
+    connection.destroy();
+    connection = undefined;
+    clearQueue(); // 큐 비우기
+    pauseButton.setLabel('일시정지').setEmoji('⏸️');
+    loopButton.setLabel('반복재생: off');
+    isLooping = false;
+    musicMsg.edit({ embeds: [musicEmbed], components: [musicButtons1, musicButtons2] });
 }
-
-function togglePauseMusic() { // pause: true 반환, unpause: false 반환
-    if (connection && connection.state.subscription) {
-        const player = connection.state.subscription.player;
-        if (player.state.status === AudioPlayerStatus.Playing) {
-            player.pause();
-            return true;
-        } else if (player.state.status === AudioPlayerStatus.Paused) {
-            player.unpause();
-            return false;
-        }
-    } else {
-        return null;
+/** pause: true 반환, unpause: false 반환 */
+function togglePauseMusic() { 
+    const player = connection.state.subscription.player;
+    if (player.state.status === AudioPlayerStatus.Playing) {
+        player.pause();
+        return true;
+    } else if (player.state.status === AudioPlayerStatus.Paused) {
+        player.unpause();
+        return false;
     }
 }
 
 function skipMusic() {
-    if (connection && connection.state.subscription) {
-        connection.state.subscription.player.pause();
-        playMusic();
-    } else {
-        return null;
+    if (musicQueue.length === 0) {
+        return false;
     }
+    connection.state.subscription.player.pause();
+    playMusic();
 }
 
 async function addFiveSongs(quary) {
     console.log(`${quary}검색 중`);
     let res = await playdl.search(quary, { source: { youtube: "video" } });
-    for (let i = res.length - 1; i > 0; i--) { // Fisher-Yates 셔플 알고리즘을 사용하여 랜덤으로 5개 선택
+    for (let i = res.length - 1; i > 0; i--) { 
         const j = Math.floor(Math.random() * (i + 1));
         [res[i], res[j]] = [res[j], res[i]]; // 요소 교환
     }

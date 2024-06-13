@@ -1,10 +1,33 @@
 const { Client, Events, GatewayIntentBits } = require('discord.js');
 const { initializeScheduleManager } = require('./schedule/index.js');
-const { initializeMusicService } = require('./music/index.js');
-const { handlePauseButton, handleSkipButton, handleStopButton, handleQueueButton, handleIfNotInVoice, handleArtistButton, handleLoopButton } = require('./music/interacionHandlers.js');
+const { initializeMusicService, buttonController } = require('./music/index.js');
+const { initializeCommands, commandController } = require('./commands/index.js'); 
 const { handleMusicMessage } = require('./music/messageHandlers.js');
 const { blockUserMessage } = require('./utils.js');
+const { runAuthServer } = require('./oauth2-authentication.js');
 const client = new Client({ intents: Object.values(GatewayIntentBits) });
+const path = require('path'); 
+const dotenv = require("dotenv");
+const envPath = path.resolve(__dirname, '../.env'); 
+dotenv.config({ path: envPath }); // 환경변수 로드
+
+// 테스트모드
+const testMode = Number(process.env.MODE);
+console.log("테스트모드 변수", testMode);
+let token = undefined;
+let clientId = undefined;
+let clientSecret = undefined;
+if (testMode) {
+    token = process.env.TESTTOKEN;
+    clientId = process.env.TEST_CLIENT_ID;
+    clientSecret = process.env.TEST_CLIENT_SECRET;
+} else {
+    token = process.env.TOKEN;
+    clientId = process.env.CLIENT_ID;
+    clientSecret = process.env.CLIENT_SECRET;
+}
+client.login(token); // 봇 로그인
+runAuthServer(clientId, clientSecret); // 인증서버 실행
 
 // 채널 변수 
 let scheduleChannel = undefined;
@@ -14,24 +37,22 @@ let musicChannel = undefined;
 client.on(Events.ClientReady, async () => {
     // 채널선언
     if (testMode) {
-        scheduleChannel = client.channels.cache.get('1226476047155859516'); // 테스트 동방시간표 채널
-        musicChannel = client.channels.cache.get('1232664579163558058'); // 테스트 음악채널
+        scheduleChannel = client.channels.cache.get(process.env.TEST_SCHEDULE_CHANNEL); // 테스트 동방시간표 채널
+        musicChannel = client.channels.cache.get(process.env.TEST_MUSIC_CHANNEL); // 테스트 음악채널
     } else {
-        scheduleChannel = client.channels.cache.get('1226818915997585408'); // 동방시간표 채널
-        musicChannel = client.channels.cache.get('1104009403163746396'); // 음악채널
+        scheduleChannel = client.channels.cache.get(process.env.SCHEDULE_CHANNEL); // 동방시간표 채널
+        musicChannel = client.channels.cache.get(process.env.MUSIC_CHANNEL); // 음악채널
     }
     // 시작 메시지 설정
     console.log(`[${client.user.tag}] 가동중!`);
-    client.user.set;
-    // 변경할 상태 메시지 배열
-    const statuses = [
+    const statuses = [ // 변경할 상태 메시지 배열
         '동아리방을 사용 후 꼭 정리 해 주세요!',
         '!!네이비즘을 찍는것을 잊지 마세요!!',
         '동아리방 장비 비싸니 조심히 다뤄주세요',
         '버그 및 기능 요구는 [조승민]에게',
         '제작자 깃허브: https://github.com/VictorJo3538'
     ];
-    // 5초마다 상태 메시지 변경
+    // 10초마다 상태 메시지 변경
     let index = 0;
     setInterval(() => {
         client.user.setPresence({
@@ -43,6 +64,7 @@ client.on(Events.ClientReady, async () => {
     // 기능 초기화
     await initializeScheduleManager(scheduleChannel).catch(console.error); // 동방스케줄 매니저
     await initializeMusicService(musicChannel).catch(console.error); // 음악봇 서비스
+    await initializeCommands(client, clientId, token).catch(console.error); // 명령어
 });
 
 // 메시지
@@ -53,55 +75,6 @@ client.on(Events.MessageCreate, async msg => {
 
 // 버튼 입력
 client.on(Events.InteractionCreate, async interaction => {
-    if (!interaction.isButton())
-        return;
-    if (!interaction.member.voice.channel) {
-        await handleIfNotInVoice(interaction);
-        return;
-    }
-    if (interaction.customId === 'pause_button') {
-        await handlePauseButton(interaction);
-    }
-    if (interaction.customId === 'skip_button') {
-        await handleSkipButton(interaction);
-    }
-    if (interaction.customId === 'stop_button') {
-        await handleStopButton(interaction);
-    }
-    if (interaction.customId === 'loop_button') {
-        await handleLoopButton(interaction);
-    }
-    if (interaction.customId === 'check_queue') {
-        await handleQueueButton(interaction);
-    }
-    if (interaction.customId === 'thorn_button') {
-        await handleArtistButton(interaction, '쏜애플');
-    }
-    if (interaction.customId === 'silka_button') {
-        await handleArtistButton(interaction, '실리카겔');
-    }
+    await buttonController(interaction).catch(console.error); // 음악봇버튼
+    await commandController(interaction).catch(console.error); // slash commands
 });
-
-// 디스코드 봇 로그인
-const path = require('path'); // path 모듈 추가
-const dotenv = require("dotenv");
-const envPath = path.resolve(__dirname, '../.env'); // 절대 경로로 설정
-const envResult = dotenv.config({ path: envPath });
-
-if (envResult.error) {
-    console.error('환경 변수 로드 오류:', envResult.error);
-    return;
-}
-
-// 테스트모드
-const testMode = Number(process.env.MODE);
-console.log("테스트모드 변수", testMode);
-
-let token = undefined;
-if (testMode) {
-    token = process.env.TESTTOKEN;
-} else {
-    token = process.env.TOKEN;
-}
-console.log('다음 토큰 사용됨', token);
-client.login(token);

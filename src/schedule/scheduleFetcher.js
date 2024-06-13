@@ -3,7 +3,7 @@ const path = require('path');
 const { getDayOfWeek } = require('../utils');
 const { google } = require('googleapis');
 const auth = new google.auth.GoogleAuth({
-    keyFile: path.resolve(__dirname, './credentials.json'),
+    keyFile: path.resolve(__dirname, './credentials.json'), // credentials.json 파일 생성 필요, 없으면 만들어야함(동방문서에 접근가능한 구글계정필요)
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 

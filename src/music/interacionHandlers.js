@@ -8,10 +8,6 @@ const { pauseButton, loopButton, musicButtons1, musicButtons2 } = require('./but
 
 async function handlePauseButton(interaction) {
   let isPaused = togglePauseMusic();
-  if (isPaused === null) {
-    await interactionReply('음악 재생중이 아닙니다', interaction);
-    return;
-  }
   if (isPaused) {
     await interactionReply('일시 정지되었습니다!', interaction);
     pauseButton.setLabel('재생').setEmoji('▶️');
@@ -23,20 +19,14 @@ async function handlePauseButton(interaction) {
 }
 
 async function handleSkipButton(interaction) {
-  const res = skipMusic();
-  if (res === null) {
-    await interactionReply('음악 재생중이 아닙니다', interaction);
-    return;
-  }
+  if (!skipMusic()){
+    await interactionReply('마지막 곡 입니다!', interaction);
+  };
   await interactionReply('스킵 되었습니다!', interaction);
 }
 
 async function handleStopButton(interaction) {
-  const res = stopMusic();
-  if (res === null) {
-    await interactionReply('음악 재생중이 아닙니다', interaction);
-    return;
-  }
+  stopMusic();
   await interactionReply('종료 되었습니다!', interaction);
 }
 
@@ -73,8 +63,8 @@ async function handleQueueButton(interaction) {
 async function handleArtistButton(interaction, artist) {
   await interactionReply(`랜덤 ${artist} 노래 5곡을 재생목록에 추가합니다`, interaction);
   await addFiveSongs(artist);
-  const res = checkConnection(interaction);
-  if (!res) {
+  const connection = getConnection();
+  if (!connection || !connection.state.subscription) {
     const voiceChannel = interaction.member.voice.channel;
     try {
       const connection = joinVoiceChannel({
@@ -95,14 +85,6 @@ async function handleIfNotInVoice(interaction) {
   await interactionReply(`<@${interaction.member.id}> 음성채널에 입장해주세요`, interaction);
 }
 
-function checkConnection() {
-  const connection = getConnection();
-  if (connection && connection.state.subscription) {
-    return true;
-  }
-  return false;
-}
-
 async function interactionReply(content, interaction, timeout = 3000) {
   let reply;
   if (typeof content == "string") {
@@ -114,11 +96,22 @@ async function interactionReply(content, interaction, timeout = 3000) {
     setTimeout(() => reply.delete(), timeout);
 }
 
+function withConnectionCheck(handler) {
+  return async function(interaction, ...args) {
+    const connection = getConnection();
+    if (connection && connection.state.subscription) {
+      return await handler(interaction, ...args);
+    }
+    await interactionReply('음악 재생중이 아닙니다', interaction);
+    return false;
+  };
+}
+
 module.exports = {
-  handlePauseButton,
-  handleSkipButton,
+  handlePauseButton: withConnectionCheck(handlePauseButton),
+  handleSkipButton: withConnectionCheck(handleSkipButton),
   handleStopButton,
-  handleLoopButton,
+  handleLoopButton: withConnectionCheck(handleLoopButton),
   handleQueueButton,
   handleArtistButton,
   handleIfNotInVoice,
