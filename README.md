@@ -8,6 +8,7 @@
 ## 사용법
 
 로컬에서 실행 => src 폴더를 열자마자 있는 index.js를 사용
+
 서버에서 실행 => git clone으로 옮긴 뒤 폴더에 들어가서 'docker-compose up --build -d' 명령어 사용. 끌때는 docker-compose down
 
 ---
