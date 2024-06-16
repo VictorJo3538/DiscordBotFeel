@@ -1,11 +1,11 @@
-// help.js
+// ping.js
 const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('help')
-    .setDescription('FEEL 디코봇에 대한 사용법을 보여줍니다'),
+    .setName('ping')
+    .setDescription('핑퐁'),
   run: async (interaction) => {
-    await interaction.reply('도움!');
+    await interaction.reply('pong');
   },
 };

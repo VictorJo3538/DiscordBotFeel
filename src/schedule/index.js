@@ -1,7 +1,8 @@
 const { getScheduleEmbed } = require('./scheduleEmbed.js');
 const { getData } = require('./scheduleFetcher.js');
-const path = require('path');
 const { DateTime } = require('luxon');
+const { purgeChannel } = require('../utils.js');
+const path = require('path');
 const feel_logo = path.resolve(__dirname, '../../public/feel_logo.png');
 
 /** 한국 시간대(KST) 기준으로 10시에 메시지 업데이트 */
@@ -18,11 +19,13 @@ async function initializeScheduleManager(scheduleChannel) {
 
     // interval 후에 메시지 전송
     setTimeout(async () => {
+        await purgeChannel(scheduleChannel);
         await scheduleChannel.send({ embeds: [await getScheduleEmbed(await getData())], files: [feel_logo] });
         console.log(`[${now.toISO()}] 날짜가 변경되었습니다. 메시지를 전송합니다.`);
 
         // 24시간 후에 다시 실행
         setInterval(async () => {
+            await purgeChannel(scheduleChannel);
             await scheduleChannel.send({ embeds: [await getScheduleEmbed(await getData())], files: [feel_logo] });
             console.log(`[${now.toISO()}] 날짜가 변경되었습니다. 메시지를 전송합니다.`);
         }, 86400000); // 24시간 = 86400000밀리초

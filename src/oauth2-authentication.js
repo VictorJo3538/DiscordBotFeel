@@ -2,16 +2,13 @@ const express = require('express');
 const axios = require('axios');
 const url = require('url');
 const path = require('path');
-const dotenv = require("dotenv");
-const envPath = path.resolve(__dirname, '../.env');
-dotenv.config({ path: envPath }); // 환경변수 로드
 
 /**
  * oauth2 redirection 인증을 위한 함수. 로컬에서 실행시에만 동작함.
  * @param {*} clientId 
  * @param {*} clientSecret 
  */
-function runAuthServer(clientId, clientSecret) { 
+function runAuthServer(clientId, clientSecret) {
     const port = process.env.PORT;
     const app = express();
     app.get('/api/auth/discord/redirect', async (req, res) => {
@@ -76,4 +73,22 @@ function runAuthServer(clientId, clientSecret) {
 
 module.exports = {
     runAuthServer
+}
+
+if (require.main === module) {
+    const dotenv = require("dotenv");
+    const envPath = path.resolve(__dirname, '../.env');
+    dotenv.config({ path: envPath }); // 환경변수 로드
+    const testMode = Number(process.env.MODE);
+    console.log("테스트모드 변수", testMode);
+    let clientId = undefined;
+    let clientSecret = undefined;
+    if (testMode) {
+        clientId = process.env.TEST_CLIENT_ID;
+        clientSecret = process.env.TEST_CLIENT_SECRET;
+    } else {
+        clientId = process.env.CLIENT_ID;
+        clientSecret = process.env.CLIENT_SECRET;
+    }
+    runAuthServer(clientId, clientSecret);
 }

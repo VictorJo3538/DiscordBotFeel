@@ -21,6 +21,7 @@ async function handlePauseButton(interaction) {
 async function handleSkipButton(interaction) {
   if (!skipMusic()){
     await interactionReply('마지막 곡 입니다!', interaction);
+    return;
   };
   await interactionReply('스킵 되었습니다!', interaction);
 }

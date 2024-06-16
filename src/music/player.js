@@ -75,11 +75,13 @@ function togglePauseMusic() {
 }
 
 function skipMusic() {
+    const musicQueue = getQueue();
     if (musicQueue.length === 0) {
         return false;
     }
     connection.state.subscription.player.pause();
     playMusic();
+    return true;
 }
 
 async function addFiveSongs(quary) {
